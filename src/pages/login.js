@@ -2,10 +2,13 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';  // ✅ Import icons
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -20,18 +23,20 @@ export default function Login() {
         password,
       });
 
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
+      const { access, refresh } = response.data;
+
+      // ✅ Save tokens in cookies for 7 days
+      Cookies.set('accessToken', access, { expires: 7 });
+      Cookies.set('refreshToken', refresh, { expires: 7 });
 
       setMessage('✅ Login successful! Redirecting...');
-      // Optional: Redirect user after successful login (if needed)
+      // Optional Redirect
       // window.location.href = '/dashboard';
 
     } catch (error) {
       console.error('Login error:', error);
 
       if (error.response && error.response.data) {
-        // Show user-friendly error from API
         const errorDetail =
           error.response.data.detail || 'Invalid email or password. Please try again.';
         setMessage(`❌ ${errorDetail}`);
@@ -52,23 +57,39 @@ export default function Login() {
         <p className="text-center text-gray-600 mb-6">Plan your next adventure with us!</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full px-4 py-2 border border-gray-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          {/* Email with icon */}
+          <div className="relative">
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 border border-gray-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          {/* Password with icon + eye toggle */}
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              className="w-full px-4 py-2 pl-10 pr-10 border border-gray-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+
+            {/* Eye toggle */}
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
           <button
             type="submit"
@@ -95,8 +116,9 @@ export default function Login() {
 
         <div className="mt-6 text-center">
           <Link href="/register">
-            <button className="text-green-700 hover:underline"><p>Don&#39;t have an account? Register here</p>
-</button>
+            <button className="text-green-700 hover:underline">
+              <p>Don&apos;t have an account? Register here</p>
+            </button>
           </Link>
         </div>
       </div>
