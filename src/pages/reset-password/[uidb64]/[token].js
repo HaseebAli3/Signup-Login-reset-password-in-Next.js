@@ -1,20 +1,19 @@
-'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import Link from 'next/link';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'; // ✅ Added for Eye Icon
 
 export default function ResetPasswordConfirm() {
   const router = useRouter();
   const { uidb64, token } = router.query;
 
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // ✅ State for toggle
   const [message, setMessage] = useState('');
-  const [apiResponse, setApiResponse] = useState(null);
   const [tokenValid, setTokenValid] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Check token validity on first load
   useEffect(() => {
     const checkTokenValidity = async () => {
       if (uidb64 && token) {
@@ -22,47 +21,26 @@ export default function ResetPasswordConfirm() {
           await axios.get(`http://127.0.0.1:8000/api/auth/password-reset-confirm/${uidb64}/${token}/`);
           setTokenValid(true);
         } catch (error) {
-          console.error('Token Validation Error:', error);
-          if (error.response && error.response.data) {
-            setMessage('❌ Token Error: ' + JSON.stringify(error.response.data));
-          } else if (error.request) {
-            setMessage('❌ No response from server.');
-          } else {
-            setMessage('❌ Unexpected Error: ' + error.message);
-          }
+          setMessage('❌ Invalid or expired link.');
           setTokenValid(false);
         } finally {
           setLoading(false);
         }
       }
     };
-
     checkTokenValidity();
   }, [uidb64, token]);
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `http://127.0.0.1:8000/api/auth/password-reset-confirm/${uidb64}/${token}/`,
         { password: newPassword }
       );
-
-      setMessage('✅ Password reset successful!');
-      setApiResponse(response.data);
+      setMessage('✅ Password reset successful! You can now login.');
     } catch (error) {
-      console.error('Password Reset Error:', error);
-      if (error.response && error.response.data) {
-        setMessage('❌ Error: ' + JSON.stringify(error.response.data));
-        setApiResponse(error.response.data);
-      } else if (error.request) {
-        setMessage('❌ No response from server.');
-        setApiResponse(null);
-      } else {
-        setMessage('❌ Unexpected Error: ' + error.message);
-        setApiResponse(null);
-      }
+      setMessage('❌ Failed to reset password. Please try again.');
     }
   };
 
@@ -75,14 +53,29 @@ export default function ResetPasswordConfirm() {
           <p className="text-center text-gray-600">Checking reset link...</p>
         ) : tokenValid ? (
           <form onSubmit={handlePasswordReset} className="space-y-4">
-            <input
-              type="password"
-              placeholder="Enter new password"
-              className="w-full px-4 py-2 border border-gray-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
+            
+            {/* ✅ Password Input with Eye Toggle */}
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter new password"
+                className="w-full px-4 py-2 border border-gray-300 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+
+              <div
+                className="absolute inset-y-0 right-2 flex items-center cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="h-5 w-5 text-gray-600" />
+                ) : (
+                  <EyeIcon className="h-5 w-5 text-gray-600" />
+                )}
+              </div>
+            </div>
 
             <button
               type="submit"
@@ -98,19 +91,10 @@ export default function ResetPasswordConfirm() {
         {message && tokenValid && (
           <div
             className={`mt-4 p-3 text-center text-sm rounded ${
-              message.includes('Error') || message.includes('Unexpected') || message.includes('No response')
-                ? 'bg-red-100 text-red-700'
-                : 'bg-green-100 text-green-700'
+              message.includes('Failed') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
             }`}
           >
             {message}
-          </div>
-        )}
-
-        {apiResponse && (
-          <div className="mt-4 bg-gray-900 text-green-300 p-3 rounded text-xs overflow-x-auto border border-gray-700">
-            <h4 className="font-semibold mb-1 text-green-400">API Response:</h4>
-            <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
           </div>
         )}
 

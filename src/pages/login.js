@@ -3,7 +3,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';  // ✅ Import icons
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -30,7 +30,7 @@ export default function Login() {
       Cookies.set('refreshToken', refresh, { expires: 7 });
 
       setMessage('✅ Login successful! Redirecting...');
-      // Optional Redirect
+      // ✅ Optional redirect:
       // window.location.href = '/dashboard';
 
     } catch (error) {
@@ -41,9 +41,9 @@ export default function Login() {
           error.response.data.detail || 'Invalid email or password. Please try again.';
         setMessage(`❌ ${errorDetail}`);
       } else if (error.request) {
-        setMessage('❌ Server is not responding. Please try again later.');
+        setMessage('❌ Server not responding. Please try again later.');
       } else {
-        setMessage('❌ Something went wrong. Please check your connection and try again.');
+        setMessage('❌ Something went wrong. Check your connection.');
       }
     } finally {
       setLoading(false);
@@ -57,7 +57,8 @@ export default function Login() {
         <p className="text-center text-gray-600 mb-6">Plan your next adventure with us!</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email with icon */}
+
+          {/* Email Field with Icon */}
           <div className="relative">
             <input
               type="email"
@@ -70,7 +71,7 @@ export default function Login() {
             <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
 
-          {/* Password with icon + eye toggle */}
+          {/* Password Field with Icon and Show/Hide */}
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -81,8 +82,6 @@ export default function Login() {
               required
             />
             <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-
-            {/* Eye toggle */}
             <span
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer"
@@ -91,6 +90,7 @@ export default function Login() {
             </span>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             className={`w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white py-2 rounded shadow-md transition duration-200 ${
@@ -102,6 +102,7 @@ export default function Login() {
           </button>
         </form>
 
+        {/* Message Alert */}
         {message && (
           <div
             className={`mt-4 p-3 text-center text-sm rounded ${
@@ -114,6 +115,14 @@ export default function Login() {
           </div>
         )}
 
+        {/* Forgot Password Link */}
+        <div className="mt-4 text-center">
+          <Link href="/reset-password">
+            <button className="text-blue-600 hover:underline">Forgot Password?</button>
+          </Link>
+        </div>
+
+        {/* Register Link */}
         <div className="mt-6 text-center">
           <Link href="/register">
             <button className="text-green-700 hover:underline">
