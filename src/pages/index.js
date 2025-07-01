@@ -29,16 +29,7 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Placeholder for Future Image */}
-      {/* 
-      <div className="mt-8">
-        <img
-          src="/images/nomadic-banner.jpg"
-          alt="Nomadic Travel Banner"
-          className="w-full max-w-md rounded-lg shadow-lg"
-        />
-      </div> 
-      */}
+     
 
     </div>
   );
